@@ -46,7 +46,7 @@ ready(function() {
 				const now = new Date();
 				const totalSecondsToday = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
 				const progress = totalSecondsToday / 86400;
-				const orbitAngle = (progress * 360) - 90;
+				const orbitAngle = (progress * 360) + 180;
 				const orbitEl = document.getElementById("celestial-orbit");
 				const moonEl = orbitEl.querySelector('.moon');
 				orbitEl.style.transform = `rotate(${orbitAngle}deg)`;

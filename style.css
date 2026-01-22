@@ -258,9 +258,9 @@
 			background: var(--color-primary);
 			z-index: 10;
 			transform-origin: bottom;
-			animation: remuer 1s ease-in-out infinite;
+			animation: remuer 2s ease-in-out infinite;
 			transform-style: preserve-3d;
-			transition: all 0.2s ease-in-out;
+			transition: bottom .2s ease-in-out,border-radius .2s ease-in-out;transform .3s ease-in-out;
 			transform: translate3d(0,0,0);
 		}
 		
@@ -396,18 +396,10 @@
 			color:var(--color-secondary);
 		}
 		
-		.sun, .moon {
-			top: 50%;
-		}
+		.sun, .moon {left: 50%;}
 
-		.sun {
-			left: 0;
-		}
+		.sun {top: 0;}
 
-		.moon {
-			left: 100%;
-		}
+		.moon {bottom: 0;}
 		
-		.open-page .orbit-wrapper {
-			opacity: 1;
-		}
+		.open-page .orbit-wrapper {opacity: 1;}
