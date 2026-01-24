@@ -95,7 +95,9 @@ ready(function() {
 				if(!htmlEl.classList.contains("open-page")) htmlEl.classList.add("open-page");
 				updateClock(now);
 				updateCelestialPosition(now);
-				setTimeout((now) => {
+				let timer = null;
+				if(timer) clearTimeout(timer)
+				timer = setTimeout((now) => {
 					updateTheme();
 					const todayStr = new Date().toISOString().split('T')[0];
 					if (todayStr !== currentDay && verif) {
