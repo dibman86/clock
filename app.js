@@ -155,7 +155,7 @@ ready(function() {
 						catQueut.style.animation = 'none';
 						catQueut.style.borderRadius = '50% 50% 0 0'
 				  } else {
-						catQueut.style.animationPlayState = 'remuer 2s ease-in-out infinite';
+						catQueut.style.animation = 'remuer 2s ease-in-out infinite';
 						catQueut.style.borderRadius = '20px 20px 0 0'
 				  }
 			}
