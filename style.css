@@ -355,7 +355,7 @@
 		
 		.is-hiding #cat-queut {
            animation-play-state: paused!important;
-			animation : none;
+			animation : none!important;
 			bottom: 31%;
 			border-radius: 50% 50% 0 0!important;
         }
