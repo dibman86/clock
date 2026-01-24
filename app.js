@@ -25,105 +25,20 @@ ready(function() {
 			const SUN_CACHE_KEY = "cached_sun_times";
 			const FOUR_MONTHS_MS = 4 * 30 * 24 * 60 * 60 * 1000;
 			let sunData = { sunrise: null, sunset: null };
+			let currentDay = new Date().toISOString().split('T')[0];
 			
-			const safeGetItem = (key) => {
-				try {
-					return localStorage.getItem(key);
-				} catch (e) {
-					console.warn("LocalStorage inaccessible ou corrompu");
-					return null;
-				}
-			};
+			const safeGetItem = (key) => {return localStorage.getItem(key);};
 			
-			const safeSetItem = (key, value) => {
-				try {
-					localStorage.setItem(key, value);
-				} catch (e) {
-					console.error("Impossible d'écrire dans le LocalStorage", e);
-				}
-			};
+			const safeSetItem = (key, value) => {localStorage.setItem(key, value);};
 				
-			const updateCelestialPosition = () => {
-				const now = new Date();
-				const totalSecondsToday = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
+			const updateCelestialPosition = (d) => {
+				const totalSecondsToday = (d.getHours() * 3600) + (d.getMinutes() * 60) + d.getSeconds();
 				const progress = totalSecondsToday / 86400;
 				const orbitAngle = (progress * 360) + 180;
 				const orbitEl = document.getElementById("celestial-orbit");
 				const moonEl = orbitEl.querySelector('.moon');
 				orbitEl.style.transform = `rotate(${orbitAngle}deg)`;
 				moonEl.style.transform = `translate(-50%,50%) rotate(${-orbitAngle}deg)`;
-			};
-
-			const updateTheme = () => {
-				const now = new Date();
-				let isDay;
-				if (sunData.sunrise && sunData.sunset) {
-					isDay = now >= sunData.sunrise && now <= sunData.sunset;
-				} else {
-					const h = now.getHours();
-					isDay = h >= 7 && h < 19;
-				}
-				
-				const currentClass = isDay ? "day" : "night";
-				const oldClass = isDay ? "night" : "day";
-
-				if (!htmlEl.classList.contains(currentClass)) {
-					htmlEl.classList.replace(oldClass, currentClass) || htmlEl.classList.add(currentClass);
-				}
-				if(!htmlEl.classList.contains("open-page")) htmlEl.classList.add("open-page");
-				updateClock(now);
-				updateCelestialPosition();
-				setTimeout(updateTheme, 1000);
-			};
-
-			const fetchSunData = () => {
-				const today = new Date().toLocaleDateString('en-CA');
-				const lastRefusal = safeGetItem(STORAGE_KEY);
-				const isRefusalValid = lastRefusal && (Date.now() - parseInt(lastRefusal) < FOUR_MONTHS_MS);
-				
-				const cached = safeGetItem(SUN_CACHE_KEY);
-				if (cached) {
-					try {
-						const parsed = JSON.parse(cached);
-						if (parsed.date === today) {
-							sunData.sunrise = new Date(parsed.sunrise);
-							sunData.sunset = new Date(parsed.sunset);
-							updateTheme();
-							return;
-						}
-					} catch(e) { /* Erreur JSON parse, on continue */ }
-				}
-
-				if (!navigator.geolocation || isRefusalValid) {
-					updateTheme();
-					return;
-				}
-
-				navigator.geolocation.getCurrentPosition(async (pos) => {
-					try {
-						const { latitude, longitude } = pos.coords;
-						const resp = await fetch(`https://api.sunrise-sunset.org/json?lat=${latitude}&lng=${longitude}&formatted=0`);
-						const json = await resp.json();
-						
-						sunData.sunrise = new Date(json.results.sunrise);
-						sunData.sunset = new Date(json.results.sunset);
-						
-						safeSetItem(SUN_CACHE_KEY, JSON.stringify({
-							date: today,
-							sunrise: sunData.sunrise,
-							sunset: sunData.sunset
-						}));
-
-						updateTheme();
-					} catch (e) {
-						updateTheme();
-					}
-				}, (err) => {
-					if (err.code === err.PERMISSION_DENIED) {
-						safeSetItem(STORAGE_KEY, Date.now());
-					}
-					updateTheme();
-				});
 			};
 			
 			function clockNumHere(divHere, numHere){
@@ -160,7 +75,87 @@ ready(function() {
 				  }
 			}
 
-			fetchSunData();
+			const updateTheme = () => {
+				const now = new Date();
+				let isDay;
+				const verif = sunData.sunrise && sunData.sunset;
+				if (verif) {
+					isDay = now >= sunData.sunrise && now <= sunData.sunset;
+				} else {
+					const h = now.getHours();
+					isDay = h >= 7 && h < 19;
+				}
+				
+				const currentClass = isDay ? "day" : "night";
+				const oldClass = isDay ? "night" : "day";
+
+				if (!htmlEl.classList.contains(currentClass)) {
+					htmlEl.classList.replace(oldClass, currentClass) || htmlEl.classList.add(currentClass);
+				}
+				if(!htmlEl.classList.contains("open-page")) htmlEl.classList.add("open-page");
+				updateClock(now);
+				updateCelestialPosition(now);
+				setTimeout((now) => {
+					updateTheme();
+					const todayStr = new Date().toISOString().split('T')[0];
+					if (todayStr !== currentDay && verif) {
+						console.log("Minuit est passé. Actualisation des données...");
+						currentDay = todayStr; 
+						fetchSunData(false);
+					}
+				}, 1000);
+			};
+
+			const fetchSunData = (b) => {
+				const lastRefusal = safeGetItem(STORAGE_KEY);
+				const isRefusalValid = lastRefusal && (Date.now() - parseInt(lastRefusal) < FOUR_MONTHS_MS);
+				if(b){
+					const cached = safeGetItem(SUN_CACHE_KEY);
+					if (cached) {
+						try {
+							const parsed = JSON.parse(cached);
+							if (parsed.date === currentDay) {
+								sunData.sunrise = new Date(parsed.sunrise);
+								sunData.sunset = new Date(parsed.sunset);
+								updateTheme();
+								return;
+							}
+						} catch(e) { /* Erreur JSON parse, on continue */ }
+					}
+				}
+				if (!navigator.geolocation || isRefusalValid) {
+					updateTheme();
+					return;
+				}
+				
+				navigator.geolocation.getCurrentPosition(async (pos) => {
+					try {
+						const { latitude, longitude } = pos.coords;
+						const resp = await fetch(`https://api.sunrise-sunset.org/json?lat=${latitude}&lng=${longitude}&formatted=0`);
+						const json = await resp.json();
+						
+						sunData.sunrise = new Date(json.results.sunrise);
+						sunData.sunset = new Date(json.results.sunset);
+						
+						safeSetItem(SUN_CACHE_KEY, JSON.stringify({
+							date: currentDay,
+							sunrise: sunData.sunrise,
+							sunset: sunData.sunset
+						}));
+						safeSetItem(STORAGE_KEY, null);
+						updateTheme();
+					} catch (e) {
+						updateTheme();
+					}
+				}, (err) => {
+					if (err.code === err.PERMISSION_DENIED) {
+						safeSetItem(STORAGE_KEY, Date.now());
+					}
+					updateTheme();
+				});
+			};
+
+			fetchSunData(true);
 		}
 
 		function randomEffect() {

@@ -1,5 +1,8 @@
 @charset "UTF-8";
 		:root{
+			--color-bg : #7c7c7c;
+			--color-primary : #6e6e6e;
+			--color-secondary : #414141;
 			cursor: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgdmlld0JveD0iMCAwIDMwIDMwIj4NCiAgPGNpcmNsZSBjeD0iMTUiIGN5PSIxNSIgcj0iMTEiIGZpbGw9IiMwMDAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIyIiAvPg0KPC9zdmc+DQoNCg0K"), auto;
 		}
 		
