@@ -21,6 +21,7 @@ ready(function() {
 		const styleDay = () => {
 			eyesNormal.style.visibility = 'visible';
 			eyeBlink.style.visibility = 'hidden';
+			cat.style.animationPlayState = 'running';
 			container.style.transform = `translateX(0px) translateY(0px) rotate(0deg)`;
 		}
 		
@@ -28,7 +29,7 @@ ready(function() {
 			eyesNormal.style.visibility = 'hidden';
 			eyeBlink.style.visibility = 'visible';
 			cat.style.animationPlayState = 'paused';
-			container.style.transform = `translateX(0px) translateY(0px) rotate(-10deg)`;
+			container.style.transform = `translateX(0px) translateY(12px) rotate(-10deg)`;
 		}
 		
 		async function startThemeEngine() {
@@ -90,12 +91,12 @@ ready(function() {
 			const updateTheme = () => {
 				const now = new Date();
 				let isDay;
-				const verif = sunData.sunrise && sunData.sunset;
+				const verif = sunData.sunrise && sunData.sunset ? true : false;
 				if (verif) {
 					isDay = now >= sunData.sunrise && now <= sunData.sunset;
 				} else {
 					const h = now.getHours();
-					isDay = h >= 7 && h < 19;
+					isDay = h >= 8 && h < 19;
 				}
 				
 				const currentClass = isDay ? "day" : "night";
@@ -255,6 +256,7 @@ ready(function() {
 				updatePupil(pupilR, 140, 105, mouseX, mouseY);
 				eyeBlink.style.visibility = 'hidden';
 				eyesNormal.style.visibility = 'visible';
+				container.style.transitionDuration = "0.1s";
 			}
 			cat.style.animationPlayState = 'paused';
 		}, false);
@@ -268,6 +270,7 @@ ready(function() {
 			pupilR.setAttribute('cx', 140);
 			pupilR.setAttribute('cy', 105);
 			hitbox.style.transform = `translateX(0px) translateY(0px)`;
+			container.style.transitionDuration = "0.5s";
 			document.documentElement.classList.contains('night') ? styleNight() : styleDay();
 		};
 
