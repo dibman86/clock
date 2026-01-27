@@ -12,7 +12,7 @@ ready(function() {
 		const whiskersL = document.getElementById('whiskers-left');
 		const whiskersR = document.getElementById('whiskers-right');
 		const catQueut = document.getElementById('cat-queut');
-		const audio = document.getElementById('monAudio');
+		const zzz = document.getElementById('zzz-container');
 		let isHiding = false;
 		let isonscreen = false;
 		
@@ -30,6 +30,8 @@ ready(function() {
 			eyeBlink.style.visibility = 'visible';
 			cat.style.animationPlayState = 'paused';
 			container.style.transform = `translateX(0px) translateY(12px) rotate(-10deg)`;
+			zzz.style.opacity = '1';
+			zzz.style.transitionDelay = "3s";
 		}
 		
 		async function startThemeEngine() {
@@ -289,6 +291,8 @@ ready(function() {
 				eyeBlink.style.visibility = 'hidden';
 				eyesNormal.style.visibility = 'visible';
 				container.style.transitionDuration = "0.1s";
+				zzz.style.opacity = '0';
+				zzz.style.transitionDelay = "0s";
 			}
 			cat.style.animationPlayState = 'paused';
 		}, false);
@@ -302,7 +306,7 @@ ready(function() {
 			pupilR.setAttribute('cx', 140);
 			pupilR.setAttribute('cy', 105);
 			hitbox.style.transform = `translateX(0px) translateY(0px)`;
-			container.style.transitionDuration = "0.5s";
+			container.style.transitionDuration = "3s";
 			document.documentElement.classList.contains('night') ? styleNight() : styleDay();
 		};
 
