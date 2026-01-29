@@ -13,8 +13,10 @@ ready(function() {
 		const whiskersR = document.getElementById('whiskers-right');
 		const catQueut = document.getElementById('cat-queut');
 		const zzz = document.getElementById('zzz-container');
+		
 		let isHiding = false;
 		let isonscreen = false;
+		let clockTimer = null;
 		
 		document.body.classList.add("ready");
 		
@@ -44,7 +46,7 @@ ready(function() {
 			const staticHoursSunrise = 8;
 			const staticMinutesSunrise = 30;
 			const staticHoursSunset = 19;
-			const staticMinutesSunset = 00;
+			const staticMinutesSunset = 0;
 			
 			const safeGetItem = (key) => {return localStorage.getItem(key);};
 			const safeSetItem = (key, value) => {localStorage.setItem(key, value);};
@@ -114,6 +116,8 @@ ready(function() {
 			}
 
 			const updateTheme = () => {
+				if(clockTimer) clearTimeout(clockTimer)
+
 				const htmlEl = document.documentElement;
 				const now = new Date();
 				const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
@@ -144,9 +148,8 @@ ready(function() {
 				
 				updateClock(globalDataTime);
 				updateCelestialPosition(now);
-				let timer = null;
-				if(timer) clearTimeout(timer)
-				timer = setTimeout(() => {
+				
+				clockTimer = setTimeout(() => {
 					updateTheme();
 					const todayStr = new Date().toISOString().split('T')[0];
 					if (todayStr !== currentDay && verif) {

@@ -495,14 +495,11 @@
 			font-size: 4rem;
 			transform: translate(-50%, -50%);
 			color:var(--color-secondary);
-		}
-		
-		.sun, .moon {
 			left: 50%;
 			opacity: 0.3;
 			transition: opacity 0.5s ease;
 		}
-
+		
 		.sun {top: 0;}
 
 		.moon {top: 100%;}
