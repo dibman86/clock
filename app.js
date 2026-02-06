@@ -16,7 +16,9 @@ ready(function() {
 		
 		let isHiding = false;
 		let isonscreen = false;
+		let isOverHitbox = null;
 		let clockTimer = null;
+		let timeout= null;
 		
 		document.body.classList.add("ready");
 		
@@ -243,8 +245,6 @@ ready(function() {
 		
 		randomEffect();
 		
-		let timeout= null;
-
 		const showCrossEyes = () => {
 			isHiding = true;
 			document.body.classList.add('is-hiding');
@@ -274,7 +274,7 @@ ready(function() {
 			container.style.transform = `translateX(${moveX}px) translateY(${moveY}px)`;
 			hitbox.style.transform = `translateX(${moveX}px) translateY(${moveY}px)`;
 			const elementAtPoint = document.elementFromPoint(mouseX, mouseY);
-			const isOverHitbox = hitbox.contains(elementAtPoint);
+			isOverHitbox = hitbox.contains(elementAtPoint);
 			isonscreen = true;
 			
 			if (isOverHitbox) {
@@ -313,7 +313,9 @@ ready(function() {
 			document.documentElement.classList.contains('night') ? styleNight() : styleDay();
 		};
 
-		main.addEventListener('pointerup', resetState);
+		main.addEventListener('pointerup',() => {
+			if(isOverHitbox) resetState();
+		});
 		main.addEventListener('pointerleave', resetState);
 		
         function updatePupil(pupil, originX, originY, mouseX, mouseY) {
