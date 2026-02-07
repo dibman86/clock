@@ -1,4 +1,8 @@
 @charset "UTF-8";
+		*,*:after,*:before {
+			box-sizing: border-box;
+		}
+		
 		:root{
 			--color-bg : #7c7c7c;
 			--color-hz : #5a5a5a;
@@ -189,10 +193,8 @@
 			text-transform: capitalize;
 			margin-top: 4px;
 			border-width: 2px;
-			display: none;
-			opacity: 0;
 			transform: translateY(0px) rotateX(-90deg);
-			transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s,opacity 0.1s ease,display 0.1s ease allow-discrete,background-color 1s ease,border-color 1s ease;
+			transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s,background-color 1s ease,border-color 1s ease;
 		}
 		
         #clock:hover #time-display {
@@ -200,17 +202,8 @@
         }
 
         #clock:hover #date-display {
-			display: block;
-			opacity: 1;
 			transform: translateY(-10px) rotateX(0deg); 
         }
-		
-		@starting-style {
-			#clock:hover #date-display {
-				opacity: 0;
-				transform: translateY(0px) rotateX(-90deg);
-			}
-		}
 		
 		#clock:hover ~  #cat-global-container #cat {
 			animation-play-state: paused;
@@ -654,6 +647,94 @@
 			opacity: 0;
 			transform: translate(40px, -100px) scale(1.2);
 		  }
+		}
+		
+		.loader{
+			position: absolute;
+			background: #000;
+			width: 50%;
+			height: 100%;
+			top: 0;
+			transition: transform 1s cubic-bezier(.79,.14,.15,.86) 1s,opacity .1s 2s;
+			z-index: 999;
+		}
+		
+		.loader-left{
+			left: 0; 
+			border-right: 2px solid #fff;
+		}
+		
+		.loader-right{
+			right: 0; 
+			border-left: 2px solid #fff;
+		}
+		
+		.open-page .loader{
+			opacity: 0;
+		}
+		
+		.open-page .loader-left{
+			transform: translateX(-100vw);
+		}
+		
+		.open-page .loader-right{
+			transform: translateX(100vw);
+		}
+		
+		.loader::before,.loader::after{
+			content: "";
+			position: absolute;
+			display: block;
+			background: #000;
+			top: 0;
+			bottom: 0;
+			margin: auto;
+		}
+		
+		.loader::before{
+			width: 200px;
+			height: 200px;
+			border: 4px solid #fff;
+			border-radius: 100%;
+		}
+		
+		.loader::after{
+			width: 100%;
+			height: 100%;
+			visibility: hidden;
+			transition: visibility 0s 1s;
+		}
+		
+		.loader-left::before{
+			right: -104px; 
+			border-color: #fff;
+		}
+		
+		.loader-right::before{
+			left: -100px; 
+			border-color: #fff;
+			border-style: dashed;
+			animation: spin 1s cubic-bezier(.79,.14,.15,.86) infinite;
+			transition: border 1s;
+		}
+		
+		.open-page .loader-right::before{
+			animation: none;
+			border-style: solid;
+		}
+		
+		.open-page .loader::after{
+			visibility: visible;
+		}
+		
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+
+			100% {
+				transform: rotate(360deg);
+			}
 		}
 		
 @media only screen and (max-width: 720px) {

@@ -146,7 +146,9 @@ ready(function() {
 					htmlEl.classList.contains('night') ? styleNight() : styleDay();
 				}
 				
-				if(!htmlEl.classList.contains("open-page")) htmlEl.classList.add("open-page");
+				if(!htmlEl.classList.contains("open-page")){
+					setTimeout(() => {htmlEl.classList.add("open-page");}, 1000);
+				} 
 				
 				updateClock(globalDataTime);
 				updateCelestialPosition(now);
