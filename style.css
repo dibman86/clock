@@ -26,14 +26,9 @@
 		}
 		
 		.day.sunrise,.night.sunset{
-			--color-bg : #000aaa;
 			--color-hz : #5a5a5a;
 		}
 		
-		.day.sunrise body,.night.sunset body{
-			background-image: linear-gradient(180deg,#000000 0%, #ffffff 100%);
-		}
-				
         body, html {
 			position: relative;
 			width: 100%;
@@ -42,14 +37,29 @@
 			margin: auto;
 			overflow: hidden;
 			font-family: sans-serif;
-			background-color: var(--color-bg);
+			background: var(--color-bg);
         }
 		
 		body{
 			user-select: none;
 			pointer-events: none;
-			transition: pointer-events 0s .5s allow-discrete,background-color 1s ease;
+			transition: pointer-events 0s .5s allow-discrete,background 1s ease;
         }
+		
+		.sky-overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			opacity: 0;
+			background: linear-gradient(180deg,#000000 0%, #ffffff 100%);
+			transition: opacity 1s ease-in-out;
+		}
+
+		.sunrise .sky-overlay, .sunset .sky-overlay {
+			opacity: 1;
+		}
 				
 		#main-container{
 			display: flex;
@@ -568,14 +578,23 @@
 
 		.moon {top: 100%;}
 		
-		.day.sunrise  .moon,.night.sunset .sun{
+		.day .sun, .night .moon{
+			opacity: 1;
+		}
+		
+		.day .moon, .night .sun{
+			opacity: 0;
+		}
+		
+		.day.sunrise .moon,.night.sunset .sun{
 			opacity: .3;
 		}
 		
-		.open-page .orbit-wrapper {opacity: 1;}
+		.day.sunrise .sun,.night.sunset .moon{
+			opacity: .6;
+		}
 		
-		.day .sun{opacity: 1;}
-		.night .moon{opacity: 1;}
+		.open-page .orbit-wrapper {opacity: 1;}
 		
 		.sky {
 			position: absolute;

@@ -44,7 +44,7 @@ ready(function() {
 			const FOUR_MONTHS_MS = 4 * 30 * 24 * 60 * 60 * 1000;
 			let sunData = { sunrise: null, sunset: null };
 			let currentDay = new Date().toISOString().split('T')[0];
-			let verif = false;
+			let hasApiData = false;
 			const staticHoursSunrise = 7;
 			const staticMinutesSunrise = 20;
 			const staticHoursSunset = 18;
@@ -59,7 +59,7 @@ ready(function() {
 				let sunrise, sunset;
 				const now = d.getTime();
 
-				if (verif) {
+				if (hasApiData) {
 					sunrise = sunData.sunrise.getTime();
 					sunset = sunData.sunset.getTime();
 				} else {
@@ -130,36 +130,42 @@ ready(function() {
 					'date' : now.toLocaleDateString('fr-FR', options)
 				}
 				const time = `${globalDataTime.hours} ${globalDataTime.minutes}`;
-				let isDay;
+				let isDay,inSunrise, inSunset;
 				
 				const sunriseStr = staticHoursSunrise.toString().padStart(2, '0') + " " + staticMinutesSunrise.toString().padStart(2, '0');
 				const sunsetStr = staticHoursSunset.toString().padStart(2, '0') + " " + staticMinutesSunset.toString().padStart(2, '0');
 				
-				verif = sunData.sunrise && sunData.sunset ? true : false;
-				if (verif) {
-					isDay = now >= sunData.sunrise && now <= sunData.sunset;
+				hasApiData = sunData.sunrise && sunData.sunset ? true : false;
+				
+				if (hasApiData) {
+					const sunriseEnd = new Date(sunData.sunrise);
+					sunriseEnd.setHours(sunriseEnd.getHours() + 1);
+					
+					const sunsetEnd = new Date(sunData.sunset);
+					sunsetEnd.setHours(sunsetEnd.getHours() + 1);
+					
+					isDay = now >= sunData.sunrise && now < sunData.sunset;
+					inSunrise = now >= sunData.sunrise && now < sunriseEnd;
+					inSunset = now >= sunData.sunset && now < sunsetEnd;
+
 				} else {
+					const sunriseStr = staticHoursSunrise.toString().padStart(2, '0') + " " + staticMinutesSunrise.toString().padStart(2, '0');
+					const sunsetStr = staticHoursSunset.toString().padStart(2, '0') + " " + staticMinutesSunset.toString().padStart(2, '0');
+					
+					const sunriseEndStr = String(staticHoursSunrise + 1).padStart(2, '0') + " " + staticMinutesSunrise.toString().padStart(2, '0');
+					const sunsetEndStr = String(staticHoursSunset + 1).padStart(2, '0') + " " + staticMinutesSunset.toString().padStart(2, '0');
+					
 					isDay = time >= sunriseStr && time < sunsetStr;
+					inSunrise = time >= sunriseStr && time < sunriseEndStr;
+					inSunset = time >= sunsetStr && time < sunsetEndStr;
 				}
+				
+				htmlEl.classList.toggle("sunrise", inSunrise);
+				htmlEl.classList.toggle("sunset", inSunset);
 				
 				const currentClass = isDay ? "day" : "night";
 				const oldClass = isDay ? "night" : "day";
 				
-				const realday = String(staticHoursSunrise + 1).padStart(2, '0') + " " + staticMinutesSunrise.toString().padStart(2, '0');
-				const realnight = String(staticHoursSunset + 1).padStart(2, '0') + " " + staticMinutesSunset.toString().padStart(2, '0');
-				
-				if(time >= sunriseStr && time < realday){
-					htmlEl.classList.add("sunrise");
-				} else {
-					htmlEl.classList.remove("sunrise");
-				} 
-				
-				if(time >= sunsetStr && time < realnight){
-					htmlEl.classList.add("sunset");
-				} else {
-					htmlEl.classList.remove("sunset");
-				} 
-
 				if (!htmlEl.classList.contains(currentClass)) {
 					htmlEl.classList.replace(oldClass, currentClass) || htmlEl.classList.add(currentClass);
 					htmlEl.classList.contains('night') ? styleNight() : styleDay();
