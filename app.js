@@ -46,9 +46,9 @@ ready(function() {
 			let currentDay = new Date().toISOString().split('T')[0];
 			let hasApiData = false;
 			const staticHoursSunrise = 7;
-			const staticMinutesSunrise = 20;
+			const staticMinutesSunrise = 0;
 			const staticHoursSunset = 18;
-			const staticMinutesSunset = 20;
+			const staticMinutesSunset = 30;
 			
 			const safeGetItem = (key) => {return localStorage.getItem(key);};
 			const safeSetItem = (key, value) => {localStorage.setItem(key, value);};
@@ -130,7 +130,7 @@ ready(function() {
 					'date' : now.toLocaleDateString('fr-FR', options)
 				}
 				const time = `${globalDataTime.hours} ${globalDataTime.minutes}`;
-				let isDay,inSunrise, inSunset;
+				let isDay,inSunrise, inSunset, isNightTime;
 				
 				const sunriseStr = staticHoursSunrise.toString().padStart(2, '0') + " " + staticMinutesSunrise.toString().padStart(2, '0');
 				const sunsetStr = staticHoursSunset.toString().padStart(2, '0') + " " + staticMinutesSunset.toString().padStart(2, '0');
@@ -139,25 +139,35 @@ ready(function() {
 				
 				if (hasApiData) {
 					const sunriseEnd = new Date(sunData.sunrise);
-					sunriseEnd.setHours(sunriseEnd.getHours() + 1);
+					sunriseEnd.setMinutes(sunriseEnd.getMinutes() + 30);
 					
 					const sunsetEnd = new Date(sunData.sunset);
-					sunsetEnd.setHours(sunsetEnd.getHours() + 1);
+					sunsetEnd.setMinutes(sunsetEnd.getMinutes() + 30);
 					
 					isDay = now >= sunData.sunrise && now < sunData.sunset;
 					inSunrise = now >= sunData.sunrise && now < sunriseEnd;
 					inSunset = now >= sunData.sunset && now < sunsetEnd;
+					isNightTime = now >= sunsetEnd || now < sunData.sunrise;
 
 				} else {
 					const sunriseStr = staticHoursSunrise.toString().padStart(2, '0') + " " + staticMinutesSunrise.toString().padStart(2, '0');
 					const sunsetStr = staticHoursSunset.toString().padStart(2, '0') + " " + staticMinutesSunset.toString().padStart(2, '0');
 					
-					const sunriseEndStr = String(staticHoursSunrise + 1).padStart(2, '0') + " " + staticMinutesSunrise.toString().padStart(2, '0');
-					const sunsetEndStr = String(staticHoursSunset + 1).padStart(2, '0') + " " + staticMinutesSunset.toString().padStart(2, '0');
+					let endMinSunrise = staticMinutesSunrise + 30;
+					let endHourSunrise = staticHoursSunrise + Math.floor(endMinSunrise / 60);
+					endMinSunrise = endMinSunrise % 60;
+
+					let endMinSunset = staticMinutesSunset + 30;
+					let endHourSunset = staticHoursSunset + Math.floor(endMinSunset / 60);
+					endMinSunset = endMinSunset % 60;
+
+					const sunriseEndStr = endHourSunrise.toString().padStart(2, '0') + " " + endMinSunrise.toString().padStart(2, '0');
+					const sunsetEndStr = endHourSunset.toString().padStart(2, '0') + " " + endMinSunset.toString().padStart(2, '0');
 					
 					isDay = time >= sunriseStr && time < sunsetStr;
 					inSunrise = time >= sunriseStr && time < sunriseEndStr;
 					inSunset = time >= sunsetStr && time < sunsetEndStr;
+					isNightTime = time >= sunsetEndStr || time < sunriseStr;
 				}
 				
 				htmlEl.classList.toggle("sunrise", inSunrise);
@@ -170,6 +180,11 @@ ready(function() {
 					htmlEl.classList.replace(oldClass, currentClass) || htmlEl.classList.add(currentClass);
 					htmlEl.classList.contains('night') ? styleNight() : styleDay();
 				}
+				
+				const starGroups = document.querySelectorAll('.stars-group');
+				starGroups.forEach(group => {
+					isNightTime ? group.classList.add("view") : group.classList.remove("view");
+				});
 				
 				if(!htmlEl.classList.contains("open-page")){
 					setTimeout(() => {htmlEl.classList.add("open-page");}, 1000);
@@ -375,6 +390,68 @@ ready(function() {
         }
 		
 		startThemeEngine();
+		
+		const randomTwinkle = () => {
+				if (!document.documentElement.classList.contains('night')) {
+					setTimeout(randomTwinkle, 2000);
+					return;
+				}
+
+				const groupNum = Math.floor(Math.random() * 3) + 1;
+				const group = document.getElementById(`stars${groupNum}`);
+
+				if (group) {
+					group.classList.add('blink');
+
+					setTimeout(() => {
+						group.classList.remove('blink');
+					}, 500);
+				}
+
+				const nextTick = Math.random() * 3500 + 500;
+				setTimeout(randomTwinkle, nextTick);
+			};
+			
+			const createStars = (callback) => {
+				const groups = [
+					document.getElementById('stars1'),
+					document.getElementById('stars2'),
+					document.getElementById('stars3')
+				];
+				
+				let shadows = ["", "", ""];
+				const totalStars = 500;
+				const w = window.innerWidth;
+				const h = window.innerHeight / 1.5;
+
+				for (let i = 0; i < totalStars; i++) {
+					const x = Math.floor(Math.random() * w);
+					const y = Math.floor(Math.random() * h);
+					const opacity = Math.random() * 0.8;
+					
+					const groupIndex = i % 3;
+					
+					shadows[groupIndex] += `${x}px ${y}px rgba(255, 255, 255, ${opacity}), `;
+				}
+
+				groups.forEach((group, index) => {
+					if (group) {
+						group.style.boxShadow = shadows[index].slice(0, -2);
+					}
+				});
+				
+				if (callback) callback();
+			};
+
+			createStars(randomTwinkle);
+
+			let resizeTimer;
+			window.addEventListener('resize', () => {
+				clearTimeout(resizeTimer);
+				resizeTimer = setTimeout(() => {
+					createStars();
+				}, 250);
+			});
 });
 
 function ready(callback){

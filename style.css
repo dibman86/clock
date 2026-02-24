@@ -74,6 +74,42 @@
 			pointer-events: auto;
 		}
 		
+		.stars-group {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 2px;
+			height: 2px;
+			background: transparent;
+			display: none;
+			opacity: 0;
+			transition: opacity 1s ease-in-out,display 1s allow-discrete;
+		}
+
+		.night .stars-group.view { 
+			display: block;
+			opacity: 1;
+		}
+		
+		.stars-group.blink {
+			animation: flash .5s ease-in-out 1;
+		}
+		
+		@keyframes flash {
+			0% { 
+				opacity: 1; 
+				filter: brightness(1);
+			}
+			50% { 
+				opacity: .5; 
+				filter: brightness(5);
+			}
+			100% { 
+				opacity: 1; 
+				filter: brightness(1);
+			}
+		}
+		
 		#clock {
 			position: absolute;
 			top: 10px;
@@ -513,6 +549,46 @@
 			transition: fill 1s ease, stroke 1s ease;
 		}
 		
+		#zzz-container {
+		  position: absolute;
+		  bottom: 20%;
+		  left: 52%;
+		  font-family: Arial, sans-serif;
+		  font-weight: bold;
+		  color: var(--color-secondary);
+		  display: none;
+		  opacity: 0;
+		  transition: opacity .5s ease;
+		}
+		
+		.night #zzz-container {
+		  display: block;
+		}
+		
+		#zzz-container span {
+		  position: absolute;
+		  opacity: 0;
+		  animation: sleep 3s linear infinite ;
+		}
+
+		#zzz-container span:nth-child(1) { animation-delay: 0s; font-size: 15px; }
+		#zzz-container span:nth-child(2) { animation-delay: 1s; font-size: 25px; }
+		#zzz-container span:nth-child(3) { animation-delay: 2s; font-size: 35px; }
+
+		@keyframes sleep {
+		  0% {
+			opacity: 0;
+			transform: translate(0, 0) scale(0.5);
+		  }
+		  30% {
+			opacity: 1;
+		  }
+		  100% {
+			opacity: 0;
+			transform: translate(40px, -100px) scale(1.2);
+		  }
+		}
+		
 		.nose .nose-two {
 			fill: none;
 			stroke: var(--color-secondary);
@@ -570,7 +646,6 @@
 			transform: translate(-50%, -50%);
 			color:var(--color-secondary);
 			left: 50%;
-			opacity: 0;
 			transition: opacity 1s ease, fill 1s ease, stroke 1s ease;
 		}
 		
@@ -578,20 +653,17 @@
 
 		.moon {top: 100%;}
 		
-		.day .sun, .night .moon{
-			opacity: 1;
-		}
 		
 		.day .moon, .night .sun{
 			opacity: 0;
 		}
 		
-		.day.sunrise .moon,.night.sunset .sun{
-			opacity: .3;
+		.night.sunset .moon {
+			opacity: .1;
 		}
 		
-		.day.sunrise .sun,.night.sunset .moon{
-			opacity: .6;
+		.night.sunset .sun {
+			opacity: 1;
 		}
 		
 		.open-page .orbit-wrapper {opacity: 1;}
@@ -691,46 +763,6 @@
 			animation-delay: 8s;
 			transform: scale(1);
 			opacity: 0.7;
-		}
-		
-		#zzz-container {
-		  position: absolute;
-		  bottom: 20%;
-		  left: 52%;
-		  font-family: Arial, sans-serif;
-		  font-weight: bold;
-		  color: var(--color-secondary);
-		  display: none;
-		  opacity: 0;
-		  transition: opacity .5s ease;
-		}
-		
-		.night #zzz-container {
-		  display: block;
-		}
-		
-		#zzz-container span {
-		  position: absolute;
-		  opacity: 0;
-		  animation: sleep 3s linear infinite ;
-		}
-
-		#zzz-container span:nth-child(1) { animation-delay: 0s; font-size: 15px; }
-		#zzz-container span:nth-child(2) { animation-delay: 1s; font-size: 25px; }
-		#zzz-container span:nth-child(3) { animation-delay: 2s; font-size: 35px; }
-
-		@keyframes sleep {
-		  0% {
-			opacity: 0;
-			transform: translate(0, 0) scale(0.5);
-		  }
-		  30% {
-			opacity: 1;
-		  }
-		  100% {
-			opacity: 0;
-			transform: translate(40px, -100px) scale(1.2);
-		  }
 		}
 		
 		.loader{
