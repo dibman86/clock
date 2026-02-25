@@ -196,7 +196,7 @@ ready(function() {
 				clockTimer = setTimeout(() => {
 					updateTheme();
 					const todayStr = new Date().toISOString().split('T')[0];
-					if (todayStr !== currentDay && verif) {
+					if (todayStr !== currentDay && hasApiData) {
 						currentDay = todayStr;
 						fetchSunData(false);
 					}
