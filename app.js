@@ -67,6 +67,21 @@ ready(function() {
 					sunset = new Date(d).setHours(staticHoursSunset, staticMinutesSunset, 0, 0);
 				}
 
+				const lp = 2551442.8;
+				const newMoon = new Date(1970, 0, 7, 20, 35, 0);
+				let phase = ((now - newMoon.getTime()) / 1000) % lp;
+				phase = phase / lp;
+				
+				const shadow = document.getElementById('moon-phase-shadow');
+					
+				if (phase < 0.5) {
+					shadow.style.left = (phase * 200) + "%";
+					shadow.style.background = "#000";
+				} else {
+					shadow.style.left = ((phase - 0.5) * 200 - 100) + "%";
+					shadow.style.background = "inherit";
+				}
+				
 				let orbitAngle;
 
 				if (now >= sunrise && now <= sunset) {
@@ -82,7 +97,7 @@ ready(function() {
 				
 				const moonEl = orbitEl.querySelector('.moon');
 				if (moonEl) {
-					moonEl.style.transform = `translate(-50%, -50%) rotate(${-orbitAngle}deg)`;
+					moonEl.style.transform = `translate(-50%, -50%) rotate(${-orbitAngle -30}deg)`;
 				}
 			};
 			
@@ -105,7 +120,6 @@ ready(function() {
 				  clockNumHere("div:nth-child(7)", d.seconds[0]);
 				  clockNumHere("div:last-child", d.seconds[1]);
 				  
-				  const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
 				  document.getElementById('date-display').textContent = d.date;
 				  
 				  if (d.minutes === "00") {
@@ -123,12 +137,23 @@ ready(function() {
 				const htmlEl = document.documentElement;
 				const now = new Date();
 				const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+				const formatter = new Intl.DateTimeFormat('fr-FR', options);
+				const parts = formatter.formatToParts(now);
+
+				const dateObj = {
+					weekday: parts.find(p => p.type === 'weekday').value,
+					day: parts.find(p => p.type === 'day').value,
+					month: parts.find(p => p.type === 'month').value,
+					year: parts.find(p => p.type === 'year').value
+				};
+				
 				const globalDataTime = {
 					'hours' : String(now.getHours()).padStart(2, '0'),
 					'minutes' : String(now.getMinutes()).padStart(2, '0'),
 					'seconds' : String(now.getSeconds()).padStart(2, '0'),
-					'date' : now.toLocaleDateString('fr-FR', options)
+					'date' : `${dateObj.weekday} ${dateObj.day} ${dateObj.month} ${dateObj.year}`
 				}
+				
 				const time = `${globalDataTime.hours} ${globalDataTime.minutes}`;
 				let isDay,inSunrise, inSunset, isNightTime;
 				

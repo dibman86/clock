@@ -651,7 +651,25 @@
 		
 		.sun {top: 0;}
 
-		.moon {top: 100%;}
+		.moon {
+			width: 80px;
+			height: 80px;
+			position: relative;
+			top: 100%;
+			background: #878787;
+			transform: translate(-50%, -50%);
+			filter: blur(1px) brightness(4) drop-shadow(0 0 20px #878787);
+			border-radius: 50%;
+			overflow: hidden;
+        }
+		
+        .moon-shadow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            border-radius: 50%;
+        }
 		
 		
 		.day .moon, .night .sun{
