@@ -250,38 +250,45 @@ ready(function() {
 				const lastRefusal = safeGetItem(STORAGE_KEY);
 				const isRefusalValid = lastRefusal && (Date.now() - parseInt(lastRefusal) < FOUR_MONTHS_MS);
 
-				if (useCache) {
-					const cached = safeGetItem(SUN_CACHE_KEY);
-					if (cached) {
-						try {
-							const parsed = JSON.parse(cached);  
-							if (parsed.date === currentDay) {
-								sunData.sunrise = new Date(parsed.sunrise);
-								sunData.sunset = new Date(parsed.sunset);
-								updateTheme();
-								return;
-							}
-						} catch (e) {
-							// Erreur JSON parse, on continue
-						}
-					}
-				}
+				const processSunResults = (lat, lng, results) => {
+					sunData.sunrise = new Date(results.sunrise);
+					sunData.sunset = new Date(results.sunset);
+
+					// On stocke la date ET la position (arrondie pour plus de souplesse)
+					const locationTag = `${Math.round(lat)},${Math.round(lng)}`;
+					safeSetItem(SUN_CACHE_KEY, JSON.stringify({
+						date: currentDay,
+						location: locationTag,
+						sunrise: sunData.sunrise,
+						sunset: sunData.sunset
+					}));
+
+					updateTheme();
+				};
 
 				const fetchSunByCoords = (lat, lng) => {
+					// Vérification du cache avec validation de la position
+					if (useCache) {
+						const cached = safeGetItem(SUN_CACHE_KEY);
+						if (cached) {
+							try {
+								const parsed = JSON.parse(cached);
+								const locationTag = `${Math.round(lat)},${Math.round(lng)}`;
+								
+								// On ne valide le cache que si la date ET la zone géographique match
+								if (parsed.date === currentDay && parsed.location === locationTag) {
+									sunData.sunrise = new Date(parsed.sunrise);
+									sunData.sunset = new Date(parsed.sunset);
+									updateTheme();
+									return;
+								}
+							} catch (e) { /* Erreur JSON, on ignore */ }
+						}
+					}
+
 					return fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lng}&formatted=0`)
 						.then(res => res.json())
-						.then(json => {
-							sunData.sunrise = new Date(json.results.sunrise);
-							sunData.sunset = new Date(json.results.sunset);
-
-							safeSetItem(SUN_CACHE_KEY, JSON.stringify({
-								date: currentDay,
-								sunrise: sunData.sunrise,
-								sunset: sunData.sunset
-							}));
-
-							updateTheme();
-						})
+						.then(json => processSunResults(lat, lng, json.results))
 						.catch(() => updateTheme());
 				};
 
@@ -291,7 +298,7 @@ ready(function() {
 						.then(data => {
 							if (!data.loc) throw new Error("Coordonnées IP manquantes");
 							const [lat, lng] = data.loc.split(",");
-							return fetchSunByCoords(lat, lng);
+							return fetchSunByCoords(parseFloat(lat), parseFloat(lng));
 						})
 						.catch(() => updateTheme());
 				};
@@ -301,12 +308,8 @@ ready(function() {
 					return;
 				}
 
-				// Geolocation disponible
 				navigator.geolocation.getCurrentPosition(
-					(pos) => {
-						const { latitude, longitude } = pos.coords;
-						fetchSunByCoords(latitude, longitude);
-					},
+					(pos) => fetchSunByCoords(pos.coords.latitude, pos.coords.longitude),
 					(err) => {
 						if (err.code === err.PERMISSION_DENIED) {
 							safeSetItem(STORAGE_KEY, Date.now());

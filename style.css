@@ -344,11 +344,12 @@
 			top: -4px;
 			width: 40px;
 			height: 25px;
-			background: var(--color-primary);
+			background-color: var(--color-primary);
+			background-image: linear-gradient(186deg,rgb(0, 0, 0) 0%, rgb(255, 255, 255) 100%);
 			border: 2px solid var(--color-secondary);
 			border-radius: 35% 35% 50% 50%;
 			overflow: hidden;
-			transition: background-color 1s ease;
+			transition: background 1s ease;
 			z-index: 1;
 		}
 		
@@ -444,6 +445,7 @@
 			width: 25px;
 			height: 250px;
 			border: 2px solid var(--color-secondary);
+			
 			border-radius: 20px 20px 0 0;
 			background: var(--color-primary);
 			z-index: 10;
@@ -452,6 +454,9 @@
 			animation: remuer 2s ease-in-out infinite;
 		}
 		
+		.day #cat-queut {
+			border-top: 3rem solid #000;
+		}
 		.is-hiding #cat-queut {
            animation-play-state: paused!important;
 			animation : none!important;
@@ -503,6 +508,10 @@
 			transition: fill 1s ease, stroke 1s ease;
 
         }
+		
+		.day #cat-body {
+			fill : url(#RGradient);
+		}
 		
 		.eye-white { 
 			fill: var(--color-secondary);
