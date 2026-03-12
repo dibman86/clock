@@ -44,11 +44,11 @@ ready(function() {
 			const FOUR_MONTHS_MS = 4 * 30 * 24 * 60 * 60 * 1000;
 			let sunData = { sunrise: null, sunset: null };
 			let currentDay = new Date().toISOString().split('T')[0];
-			let hasApiData = false;
-			const staticHoursSunrise = 7;
-			const staticMinutesSunrise = 0;
-			const staticHoursSunset = 18;
-			const staticMinutesSunset = 30;
+			
+			let config = {
+				sunrise: { h: 7, m: 00 },
+				sunset: { h: 18, m: 30 }
+			};
 			
 			const safeGetItem = (key) => {return localStorage.getItem(key);};
 			const safeSetItem = (key, value) => {localStorage.setItem(key, value);};
@@ -59,13 +59,9 @@ ready(function() {
 				let sunrise, sunset;
 				const now = d.getTime();
 
-				if (hasApiData) {
-					sunrise = sunData.sunrise.getTime();
-					sunset = sunData.sunset.getTime();
-				} else {
-					sunrise = new Date(d).setHours(staticHoursSunrise, staticMinutesSunrise, 0, 0);
-					sunset = new Date(d).setHours(staticHoursSunset, staticMinutesSunset, 0, 0);
-				}
+				sunrise = sunData.sunrise.getTime();
+				sunset = sunData.sunset.getTime();
+				
 				
 				const noon = new Date(d).setHours(12, 0, 0, 0);
 				const midnight = new Date(d).setHours(0, 0, 0, 0);
@@ -178,41 +174,17 @@ ready(function() {
 				const time = `${globalDataTime.hours} ${globalDataTime.minutes}`;
 				let isDay,inSunrise, inSunset, isNightTime;
 				
-				hasApiData = sunData.sunrise && sunData.sunset ? true : false;
-				
-				if (hasApiData) {
-					const sunriseEnd = new Date(sunData.sunrise);
-					sunriseEnd.setMinutes(sunriseEnd.getMinutes() - 30);
+				const sunriseEnd = new Date(sunData.sunrise);
+				sunriseEnd.setMinutes(sunriseEnd.getMinutes() - 30);
 					
-					const sunsetEnd = new Date(sunData.sunset);
-					sunsetEnd.setMinutes(sunsetEnd.getMinutes() + 30);
+				const sunsetEnd = new Date(sunData.sunset);
+				sunsetEnd.setMinutes(sunsetEnd.getMinutes() + 30);
 					
-					isDay = now >= sunData.sunrise && now < sunData.sunset;
-					inSunrise = now >= sunriseEnd && now < sunData.sunrise;
-					inSunset = now >= sunData.sunset && now < sunsetEnd;
-					isNightTime = now >= sunsetEnd || now < sunData.sunrise;
+				isDay = now >= sunData.sunrise && now < sunData.sunset;
+				inSunrise = now >= sunriseEnd && now < sunData.sunrise;
+				inSunset = now >= sunData.sunset && now < sunsetEnd;
+				isNightTime = now >= sunsetEnd || now < sunData.sunrise;
 
-				} else {
-					const sunriseStr = staticHoursSunrise.toString().padStart(2, '0') + " " + staticMinutesSunrise.toString().padStart(2, '0');
-					const sunsetStr = staticHoursSunset.toString().padStart(2, '0') + " " + staticMinutesSunset.toString().padStart(2, '0');
-					
-					let endMinSunrise = staticMinutesSunrise - 30;
-					let endHourSunrise = staticHoursSunrise + Math.floor(endMinSunrise / 60);
-					endMinSunrise = endMinSunrise % 60;
-
-					let endMinSunset = staticMinutesSunset + 30;
-					let endHourSunset = staticHoursSunset + Math.floor(endMinSunset / 60);
-					endMinSunset = endMinSunset % 60;
-
-					const sunriseEndStr = endHourSunrise.toString().padStart(2, '0') + " " + endMinSunrise.toString().padStart(2, '0');
-					const sunsetEndStr = endHourSunset.toString().padStart(2, '0') + " " + endMinSunset.toString().padStart(2, '0');
-					
-					isDay = time >= sunriseStr && time < sunsetStr;
-					inSunrise = time >= sunriseEndStr && time < sunriseStr;
-					inSunset = time >= sunsetStr && time < sunsetEndStr;
-					isNightTime = time >= sunsetStr || time < sunriseStr;
-				}
-				
 				htmlEl.classList.toggle("sunrise", inSunrise);
 				htmlEl.classList.toggle("sunset", inSunset);
 				
@@ -254,42 +226,60 @@ ready(function() {
 					sunData.sunrise = new Date(results.sunrise);
 					sunData.sunset = new Date(results.sunset);
 
-					// On stocke la date ET la position (arrondie pour plus de souplesse)
 					const locationTag = `${Math.round(lat)},${Math.round(lng)}`;
 					safeSetItem(SUN_CACHE_KEY, JSON.stringify({
 						date: currentDay,
 						location: locationTag,
-						sunrise: sunData.sunrise,
-						sunset: sunData.sunset
+						sunrise: results.sunrise,
+						sunset: results.sunset
 					}));
 
 					updateTheme();
 				};
+				
+				const applyFallback = () => {
+					const cached = safeGetItem(SUN_CACHE_KEY);
+					let parsed = null;
+					try { parsed = JSON.parse(cached); } catch(e) {}
+
+					if (parsed) {
+						sunData.sunrise = new Date(parsed.sunrise);
+						sunData.sunset = new Date(parsed.sunset);
+					} else {
+						sunData.sunrise = new Date();
+						sunData.sunrise.setHours(config.sunrise.h, config.sunrise.m);
+						sunData.sunset = new Date();
+						sunData.sunset.setHours(config.sunset.h, config.sunset.m);
+					}
+					updateTheme();
+				};
 
 				const fetchSunByCoords = (lat, lng) => {
-					// Vérification du cache avec validation de la position
-					if (useCache) {
-						const cached = safeGetItem(SUN_CACHE_KEY);
-						if (cached) {
-							try {
-								const parsed = JSON.parse(cached);
-								const locationTag = `${Math.round(lat)},${Math.round(lng)}`;
-								
-								// On ne valide le cache que si la date ET la zone géographique match
-								if (parsed.date === currentDay && parsed.location === locationTag) {
-									sunData.sunrise = new Date(parsed.sunrise);
-									sunData.sunset = new Date(parsed.sunset);
-									updateTheme();
-									return;
-								}
-							} catch (e) { /* Erreur JSON, on ignore */ }
-						}
+					const locationTag = `${Math.round(lat)},${Math.round(lng)}`;
+					const cached = safeGetItem(SUN_CACHE_KEY);
+					let parsedCache = null;
+
+					if (cached) {
+						try { parsedCache = JSON.parse(cached); } catch (e) {}
+					}
+
+					if (useCache && parsedCache && parsedCache.date === currentDay && parsedCache.location === locationTag) {
+						sunData.sunrise = new Date(parsedCache.sunrise);
+						sunData.sunset = new Date(parsedCache.sunset);
+						updateTheme();
+						return Promise.resolve();
 					}
 
 					return fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lng}&formatted=0`)
-						.then(res => res.json())
-						.then(json => processSunResults(lat, lng, json.results))
-						.catch(() => updateTheme());
+						.then(res => {
+							if (!res.ok) throw new Error("Erreur Réseau"); 
+							return res.json();
+						})
+						.then(json => {
+							if (json.status !== "OK") throw new Error("Erreur API");
+							processSunResults(lat, lng, json.results);
+						})
+						.catch(() => applyFallback());
 				};
 
 				const fetchSunByIP = () => {
@@ -300,7 +290,14 @@ ready(function() {
 							const [lat, lng] = data.loc.split(",");
 							return fetchSunByCoords(parseFloat(lat), parseFloat(lng));
 						})
-						.catch(() => updateTheme());
+						.catch(() => {
+							const cached = JSON.parse(safeGetItem(SUN_CACHE_KEY) || "{}");
+							if (cached.location) {
+								const [lat, lng] = cached.location.split(",");
+								return fetchSunByCoords(lat, lng);
+							}
+							applyFallback();
+						});
 				};
 
 				if (!navigator.geolocation || isRefusalValid) {
