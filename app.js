@@ -168,7 +168,7 @@ ready(function() {
 					'hours' : String(now.getHours()).padStart(2, '0'),
 					'minutes' : String(now.getMinutes()).padStart(2, '0'),
 					'seconds' : String(now.getSeconds()).padStart(2, '0'),
-					'date' : `${dateObj.weekday} ${dateObj.day.padStart(2, '0')} ${dateObj.month} ${dateObj.year}`
+					'date' : `<span id="weekday">${dateObj.weekday}</span> <span id="day">${dateObj.day.padStart(2, '0')}</span> <span id="month">${dateObj.month}</span> <span id="year">${dateObj.year}</span>`
 				}
 				
 				const time = `${globalDataTime.hours} ${globalDataTime.minutes}`;
