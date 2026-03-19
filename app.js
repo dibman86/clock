@@ -66,14 +66,16 @@ ready(function() {
 				const noon = new Date(d).setHours(12, 0, 0, 0);
 				const midnight = new Date(d).setHours(0, 0, 0, 0);
 
-				const lp = 2551442.8;
-				const newMoon = new Date(1970, 0, 7, 20, 35, 0);
-				let phase = ((now - newMoon.getTime()) / 1000) % lp;
-				phase = phase / lp;
+				const synodicMonth = 29.530588853;
+				const knownNewMoon = new Date(Date.UTC(2000, 0, 6, 18, 14, 0));
+				const daysSinceNewMoon = (now - knownNewMoon.getTime()) / 86400000;
+				let phase = (daysSinceNewMoon % synodicMonth) / synodicMonth;
 				
 				const shadow = document.getElementById('moon-phase-shadow');
-					
-				if (phase < 0.5) {
+
+				if (phase < 0.03 || phase > 0.97) {
+					shadow.style.left = "0%";
+				} else if (phase < 0.5) {
 					shadow.style.left = (phase * 200) + "%";
 				} else {
 					shadow.style.left = ((phase - 0.5) * 200 - 100) + "%";
