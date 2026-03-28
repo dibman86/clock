@@ -1,14 +1,14 @@
 ready(function() {	
 		const main = document.getElementById("main-container");
-        const hitbox = document.getElementById('cat-hitbox');
-        const container = document.getElementById('cat-container');
+		const hitbox = document.getElementById('cat-hitbox');
+		const container = document.getElementById('cat-container');
 		const cat = document.getElementById('cat');
 		const catBody = document.getElementById('cat-body');
-        const eyesNormal = document.getElementById('eyes-normal');
-        const eyesCross = document.getElementById('eyes-cross');
+		const eyesNormal = document.getElementById('eyes-normal');
+		const eyesCross = document.getElementById('eyes-cross');
 		const eyeBlink = document.getElementById('eyes-blink');
-        const pupilL = document.getElementById('pupil-l');
-        const pupilR = document.getElementById('pupil-r');
+		const pupilL = document.getElementById('pupil-l');
+		const pupilR = document.getElementById('pupil-r');
 		const whiskersL = document.getElementById('whiskers-left');
 		const whiskersR = document.getElementById('whiskers-right');
 		const catQueut = document.getElementById('cat-queut');
@@ -213,7 +213,7 @@ ready(function() {
 				clockTimer = setTimeout(() => {
 					updateTheme();
 					const todayStr = new Date().toISOString().split('T')[0];
-					if (todayStr !== currentDay && hasApiData) {
+					if (todayStr !== currentDay) {
 						currentDay = todayStr;
 						fetchSunData(false);
 					}
