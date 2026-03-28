@@ -45,7 +45,7 @@ ready(function() {
 			const SUN_CACHE_KEY = "cached_sun_times";
 			const FOUR_MONTHS_MS = 4 * 30 * 24 * 60 * 60 * 1000;
 			let sunData = { sunrise: null, sunset: null };
-			let currentDay = new Date().toISOString().split('T')[0];
+			let currentDay = new Date().toLocaleDateString('sv-SE');
 			
 			let config = {
 				sunrise: { h: 7, m: 00 },
@@ -212,7 +212,7 @@ ready(function() {
 					if(document.body.classList.contains("ready")) document.body.classList.remove("ready");
 					if(!htmlEl.classList.contains("open-page")) htmlEl.classList.add("open-page");
 					updateTheme();
-					const todayStr = new Date().toISOString().split('T')[0];
+					const todayStr = new Date().toLocaleDateString('sv-SE');
 					if (todayStr !== currentDay) {
 						currentDay = todayStr;
 						fetchSunData(false);
