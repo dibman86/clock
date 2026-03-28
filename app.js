@@ -327,7 +327,7 @@ ready(function() {
 
 			fetchSunData(true);
 		}
-
+		
 		function randomEffect() {
 			let rndL = Math.random() < 0.5 ? 1 : -1;
 			let rndR = Math.random() < 0.5 ? 1 : -1;
