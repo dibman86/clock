@@ -11,12 +11,8 @@
 			cursor: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMCIgaGVpZ2h0PSIzMCIgdmlld0JveD0iMCAwIDMwIDMwIj4NCiAgPGNpcmNsZSBjeD0iMTUiIGN5PSIxNSIgcj0iMTEiIGZpbGw9IiMwMDAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIyIiAvPg0KPC9zdmc+DQoNCg0K"), auto;
 		}
 		
-		svg{
-			visibility: hidden;
-		}
-		
-		.ready svg {
-			visibility: visible;
+		body.ready,body.ready * {
+			transition: none!important;
 		}
 		
 		.open-page.day {
@@ -673,8 +669,6 @@
 			aspect-ratio : 1/1;
 			border-radius: 50%;
 			transform-origin: center center;
-			opacity: 0;
-			transition: opacity 0.3s ease;
 		}
 
 		.celestial-body {
@@ -720,8 +714,6 @@
 		.night.sunrise .sun,.night.sunset .sun {
 			opacity: 1;
 		}
-		
-		.open-page .orbit-wrapper {opacity: 1;}
 		
 		.sky {
 			position: absolute;

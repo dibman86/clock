@@ -1,4 +1,5 @@
 ready(function() {	
+		let htmlEl = document.documentElement;
 		const main = document.getElementById("main-container");
 		const hitbox = document.getElementById('cat-hitbox');
 		const container = document.getElementById('cat-container');
@@ -154,7 +155,7 @@ ready(function() {
 			const updateTheme = () => {
 				if(clockTimer) clearTimeout(clockTimer)
 
-				const htmlEl = document.documentElement;
+				htmlEl = document.documentElement;
 				const now = new Date();
 				const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
 				const formatter = new Intl.DateTimeFormat('fr-FR', options);
@@ -196,7 +197,7 @@ ready(function() {
 				
 				if (!htmlEl.classList.contains(currentClass)) {
 					htmlEl.classList.replace(oldClass, currentClass) || htmlEl.classList.add(currentClass);
-					htmlEl.classList.contains('night') ? styleNight() : styleDay();
+					htmlEl.classList.contains('night') && !htmlEl.classList.contains('sunrise') && !htmlEl.classList.contains('sunset') ? styleNight() : styleDay();
 				}
 				
 				const starGroups = document.querySelectorAll('.stars-group');
@@ -204,14 +205,12 @@ ready(function() {
 					isNightTime ? group.classList.add("view") : group.classList.remove("view");
 				});
 				
-				if(!htmlEl.classList.contains("open-page")){
-					setTimeout(() => {htmlEl.classList.add("open-page");}, 1000);
-				} 
-				
 				updateClock(globalDataTime);
 				updateCelestialPosition(now);
 				
 				clockTimer = setTimeout(() => {
+					if(document.body.classList.contains("ready")) document.body.classList.remove("ready");
+					if(!htmlEl.classList.contains("open-page")) htmlEl.classList.add("open-page");
 					updateTheme();
 					const todayStr = new Date().toISOString().split('T')[0];
 					if (todayStr !== currentDay) {
@@ -433,7 +432,8 @@ ready(function() {
 			hitbox.style.transform = `translateX(0px) translateY(0px)`;
 			container.style.transitionDuration = "3s";
 			if (typeof styleNight === 'function') {
-				document.documentElement.classList.contains('night') ? styleNight() : styleDay();
+				htmlEl = document.documentElement;
+				htmlEl.classList.contains('night') && !htmlEl.classList.contains('sunrise') && !htmlEl.classList.contains('sunset') ? styleNight() : styleDay();
 			}
 		};
 
