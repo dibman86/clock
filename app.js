@@ -4,6 +4,7 @@ ready(function() {
 		const starContainer = document.getElementById('stars-container');
 		const hitbox = document.getElementById('cat-hitbox');
 		const container = document.getElementById('cat-container');
+		const locationName = document.getElementById('location');
 		const cat = document.getElementById('cat');
 		const catBody = document.getElementById('cat-body');
 		const eyesNormal = document.getElementById('eyes-normal');
@@ -269,16 +270,27 @@ ready(function() {
 			const fetchSunData = (useCache) => {
 				const lastRefusal = safeGetItem(STORAGE_KEY);
 				const isRefusalValid = lastRefusal && (Date.now() - parseInt(lastRefusal) < FOUR_MONTHS_MS);
-
-				const processSunResults = (lat, lng, results) => {
+				
+				const nameLocation = async (lat, lng) => {
+					const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+					const data = await response.json();
+					return data.address ? `${data.address.state_district || data.address.state} | ${data.address.country}` : "Lieu inconnu";
+					
+				}
+				
+				const CACHE_VERSION = "1.2";
+				
+				const processSunResults = async (lat, lng, locTag , namelocat, results) => {
 					
 					sunData.sunrise = new Date(results.sunrise);
 					sunData.sunset = new Date(results.sunset);
-
-					const locationTag = `${Math.round(lat)},${Math.round(lng)}`;
+					locationName.textContent = namelocat;
+					
 					safeSetItem(SUN_CACHE_KEY, JSON.stringify({
+						version: CACHE_VERSION,
 						date: currentDay,
-						loc: locationTag,
+						loc: locTag,
+						name : namelocat,
 						sunrise: results.sunrise,
 						sunset: results.sunset
 					}));
@@ -295,27 +307,32 @@ ready(function() {
 					if (parsed) {
 						sunData.sunrise = new Date(parsed.sunrise);
 						sunData.sunset = new Date(parsed.sunset);
+						locationName.textContent = parsed.name;
 					} else {
 						sunData.sunrise = new Date();
 						sunData.sunrise.setHours(config.sunrise.h, config.sunrise.m);
 						sunData.sunset = new Date();
 						sunData.sunset.setHours(config.sunset.h, config.sunset.m);
+						locationName.textContent = "Lieu inconnu";
 					}
 					updateTheme();
 				};
 
-				const fetchSunByCoords = (lat, lng) => {
+				const fetchSunByCoords = async (lat, lng) => {
 					const locationTag = `${Math.round(lat)},${Math.round(lng)}`;
 					const cached = safeGetItem(SUN_CACHE_KEY);
 					let parsedCache = null;
-
+					
+					const nameloc = await nameLocation(lat, lng);
+					
 					if (cached) {
 						try { parsedCache = JSON.parse(cached); } catch (e) {}
 					}
-
-					if (useCache && parsedCache && parsedCache.date === currentDay && parsedCache.loc === locationTag) {
+					
+					if (useCache && parsedCache && parsedCache.version === CACHE_VERSION  && parsedCache.date === currentDay && parsedCache.loc === locationTag) {
 						sunData.sunrise = new Date(parsedCache.sunrise);
 						sunData.sunset = new Date(parsedCache.sunset);
+						locationName.textContent = nameloc;
 						updateTheme();
 						return Promise.resolve();
 					}
@@ -327,7 +344,7 @@ ready(function() {
 						})
 						.then(json => {
 							if (json.status !== "OK") throw new Error("Erreur API");
-							processSunResults(lat, lng, json.results);
+							processSunResults(lat, lng, locationTag, nameloc, json.results);
 						})
 						.catch((err) => {
 							console.warn("Échec de la récupération des données solaires, application du fallback:", err);
