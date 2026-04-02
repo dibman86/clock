@@ -270,27 +270,33 @@ ready(function() {
 			const fetchSunData = (useCache) => {
 				const lastRefusal = safeGetItem(STORAGE_KEY);
 				const isRefusalValid = lastRefusal && (Date.now() - parseInt(lastRefusal) < FOUR_MONTHS_MS);
+				const CACHE_VERSION = "1.4";
 				
-				const nameLocation = async (lat, lng) => {
-					const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-					const data = await response.json();
-					return data.address ? `${data.address.state_district || data.address.state} | ${data.address.country}` : "Lieu inconnu";
-					
+				const getCityName = async (lat, lng) => {
+					try {
+						const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=fr`);
+						const data = await response.json();
+						let city = data.city || data.locality || "Ville inconnue";
+						let country = data.countryName || "Pays inconnu";
+						country = country.split('(')[0].trim();
+						
+						return `${city} | ${country}`;
+					} catch (error) {
+						console.error("Erreur de récupération :", error);
+					}
 				}
 				
-				const CACHE_VERSION = "1.2";
-				
-				const processSunResults = async (lat, lng, locTag , namelocat, results) => {
+				const processSunResults = async (lat, lng, loctag , cityname, results) => {
 					
 					sunData.sunrise = new Date(results.sunrise);
 					sunData.sunset = new Date(results.sunset);
-					locationName.textContent = namelocat;
+					locationName.textContent = cityname;
 					
 					safeSetItem(SUN_CACHE_KEY, JSON.stringify({
 						version: CACHE_VERSION,
 						date: currentDay,
-						loc: locTag,
-						name : namelocat,
+						loc: loctag,
+						city : cityname,
 						sunrise: results.sunrise,
 						sunset: results.sunset
 					}));
@@ -322,8 +328,7 @@ ready(function() {
 					const locationTag = `${Math.round(lat)},${Math.round(lng)}`;
 					const cached = safeGetItem(SUN_CACHE_KEY);
 					let parsedCache = null;
-					
-					const nameloc = await nameLocation(lat, lng);
+					const cityName = await getCityName(lat, lng);
 					
 					if (cached) {
 						try { parsedCache = JSON.parse(cached); } catch (e) {}
@@ -332,7 +337,7 @@ ready(function() {
 					if (useCache && parsedCache && parsedCache.version === CACHE_VERSION  && parsedCache.date === currentDay && parsedCache.loc === locationTag) {
 						sunData.sunrise = new Date(parsedCache.sunrise);
 						sunData.sunset = new Date(parsedCache.sunset);
-						locationName.textContent = nameloc;
+						locationName.textContent = cityName;
 						updateTheme();
 						return Promise.resolve();
 					}
@@ -344,7 +349,7 @@ ready(function() {
 						})
 						.then(json => {
 							if (json.status !== "OK") throw new Error("Erreur API");
-							processSunResults(lat, lng, locationTag, nameloc, json.results);
+							processSunResults(lat, lng, locationTag, cityName, json.results);
 						})
 						.catch((err) => {
 							console.warn("Échec de la récupération des données solaires, application du fallback:", err);
