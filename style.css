@@ -670,15 +670,18 @@
 		.horizon-blocker,.curbure , .cat-blocker::before{
 			position: absolute;
 			background-color: var(--color-hz);
-			background-image: repeating-radial-gradient(circle at 0 0, transparent 0, var(--color-hz) 35px), repeating-linear-gradient(#141414, #141414);
+			background-image: repeating-radial-gradient(circle at 0 0, transparent 0, var(--color-hz) 15px), repeating-linear-gradient(#141414, #141414);
 			transition: --color-hz 1s ease,border-color 1s ease;
 		}
 		
 		.horizon-blocker {
+			left: -50%;
+			right: -50%;
+			margin: auto;
 			bottom: 0%;
-			width: 100%;
+			width: 120%;
 			height: 52%;
-			border-radius: 50% 50% 50% 50% / 5% 5% 5% 5%;
+			border-radius: 50% 50% 0 0 / 15% 15% 0 0;
 			border-top: 2px solid var(--color-secondary);
 			z-index: 1;
 		}
@@ -689,7 +692,7 @@
 			fill: var(--color-hz);
 			stroke: var(--color-secondary);
 			stroke-width: 4;
-			transform: translate(10%,-100%);
+			transform: translateX(10%);
 			transition: fill 1s ease, stroke 1s ease;
 		}*/
 
@@ -697,8 +700,8 @@
 			position: relative;
 			display: flex;
 			align-items: flex-end;
-			top: 10px;
-			transform: translate(10%,-100%);
+			top: 20px;
+			transform: translateX(15%);
 			transition: --color-hz 1s ease;
 		}
 
